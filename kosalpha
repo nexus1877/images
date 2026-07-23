@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>8N Piano - Roblox Piano Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes twinkle {
+      0% { opacity: 0.2; transform: scale(1); }
+      100% { opacity: 1; transform: scale(1.5); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(168,85,247,0.3); }
+      50% { box-shadow: 0 0 40px rgba(168,85,247,0.6); }
+    }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-slide-up {
+      animation: slideUp 0.6s ease-out forwards;
+    }
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle infinite alternate;
+    }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+    }
+    .piano-white {
+      background: linear-gradient(180deg, #f8f8f8 0%, #e0e0e0 100%);
+      transition: all 0.1s ease;
+    }
+    .piano-white:active, .piano-white.active {
+      background: linear-gradient(180deg, #a855f7, #7c3aed);
+      transform: translateY(2px);
+      box-shadow: 0 0 25px rgba(168,85,247,0.9);
+    }
+    .piano-black {
+      background: linear-gradient(180deg, #333 0%, #111 100%);
+      z-index: 10;
+      transition: all 0.1s ease;
+    }
+    .piano-black:active, .piano-black.active {
+      background: linear-gradient(180deg, #a855f7, #7c3aed);
+      box-shadow: 0 0 25px rgba(168,85,247,0.9);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(168, 85, 247, 0.1);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(168, 85, 247, 0.4);
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(168, 85, 247, 0.6);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0a0a1a] text-white overflow-x-hidden relative">
+
+  <!-- Stars Background -->
+  <div id="stars-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <!-- Animated gradient orbs -->
+  <div class="fixed top-20 left-10 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] animate-pulse z-0"></div>
+  <div class="fixed bottom-20 right-10 w-80 h-80 bg-violet-500/15 rounded-full blur-[100px] animate-pulse z-0" style="animation-delay: 1s;"></div>
+  <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-purple-400/10 rounded-full blur-[150px] animate-pulse z-0" style="animation-delay: 2s;"></div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 max-w-6xl mx-auto px-4 py-12">
+
+    <!-- Header -->
+    <header class="text-center mb-16 animate-slide-up">
+      <div class="inline-block mb-4">
+        <h1 class="text-7xl font-black tracking-tight bg-gradient-to-r from-purple-300 via-violet-400 to-purple-500 bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(168,85,247,0.5)]">
+          8N PIANO
+        </h1>
+      </div>
+      <p class="text-purple-300/70 text-xl font-light tracking-wide">
+        Roblox Piano Converter
+      </p>
+      <div class="mt-6 flex justify-center gap-3 flex-wrap">
+        <span class="px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">Auto-Play</span>
+        <span class="px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">MD Format</span>
+        <span class="px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">Keypress Function</span>
+        <span class="px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-sm">Lua Script</span>
+      </div>
+    </header>
+
+    <!-- Upload Section -->
+    <div class="glass-panel rounded-3xl p-8 mb-8 shadow-[0_0_60px_rgba(139,92,246,0.1)] animate-slide-up" style="animation-delay: 0.1s;">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-purple-100">Upload MD File</h2>
+      </div>
+
+      <div id="drop-zone" class="border-2 border-dashed border-purple-500/30 rounded-2xl p-12 text-center transition-all duration-300 hover:border-purple-400/60 hover:bg-purple-500/5 cursor-pointer group">
+        <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-purple-500/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+          <svg class="w-10 h-10 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+          </svg>
+        </div>
+        <p class="text-purple-200 text-lg font-medium mb-2">Drop your .md piano file here</p>
+        <p class="text-purple-400/60 text-sm">or click to browse</p>
+        <input type="file" id="file-input" accept=".md,.txt,.lua" class="hidden">
+      </div>
+    </div>
+
+    <!-- Editor Section -->
+    <div class="glass-panel rounded-3xl p-8 mb-8 shadow-[0_0_60px_rgba(139,92,246,0.1)] animate-slide-up" style="animation-delay: 0.2s;">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-purple-100">Code Editor</h2>
+        </div>
+        <div class="flex gap-3 flex-wrap">
+          <button id="btn-convert" class="px-6 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl font-semibold transition-all duration-200 shadow-[0_0_20px_rgba(147,51,234,0.4)] hover:shadow-[0_0_30px_rgba(147,51,234,0.6)] flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            Convert & Play
+          </button>
+          <button id="btn-stop" class="px-6 py-2.5 bg-red-500/20 hover:bg-red-500/30 text-red-300 rounded-xl font-semibold transition-all duration-200 border border-red-500/30 flex items-center gap-2 hidden">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <rect x="6" y="6" width="12" height="12" rx="2"/>
+            </svg>
+            Stop
+          </button>
+          <button id="btn-copy" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-purple-200 rounded-xl font-semibold transition-all duration-200 border border-purple-500/30 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            Copy Lua
+          </button>
+          <button id="btn-download" class="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-purple-200 rounded-xl font-semibold transition-all duration-200 border border-purple-500/30 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+            </svg>
+            Download
+          </button>
+        </div>
+      </div>
+
+      <div class="relative">
+        <textarea id="code-editor" class="w-full h-96 bg-[#0d0d1f] border border-purple-500/20 rounded-2xl p-6 text-purple-100 font-mono text-sm leading-relaxed resize-none focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/10 transition-all custom-scrollbar" placeholder="Paste your MD piano notes here...&#10;Example:&#10;keypress(&quot;1&quot;, x, bpm)&#10;rest(0.5, bpm)&#10;keypress(&quot;@&quot;, x, bpm)"></textarea>
+        <div class="absolute top-4 right-4 text-xs text-purple-500/50 font-mono">MD / LUA</div>
+      </div>
+    </div>
+
+    <!-- Piano Visualizer -->
+    <div class="glass-panel rounded-3xl p-8 mb-8 shadow-[0_0_60px_rgba(139,92,246,0.1)] animate-slide-up" style="animation-delay: 0.3s;">
+      <div class="flex items-center gap-3 mb-6 flex-wrap">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-purple-100">Piano Visualizer</h2>
+        <span id="status-indicator" class="ml-auto px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs">Ready</span>
+      </div>
+
+      <div class="overflow-x-auto pb-4 custom-scrollbar">
+        <div id="piano-keys" class="flex justify-center gap-0.5 min-w-max select-none relative px-8">
+          <!-- Keys generated by JS -->
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-center gap-6 flex-wrap">
+        <div class="flex items-center gap-2">
+          <label class="text-purple-300 text-sm">BPM:</label>
+          <input type="number" id="bpm-input" value="120" min="40" max="300" class="w-20 bg-[#0d0d1f] border border-purple-500/30 rounded-lg px-3 py-2 text-center text-purple-100 focus:outline-none focus:border-purple-500">
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-purple-300 text-sm">Speed:</label>
+          <input type="range" id="speed-slider" min="0.25" max="2" step="0.25" value="1" class="w-32 accent-purple-500">
+          <span id="speed-value" class="text-purple-300 text-sm w-10">1.0x</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="glass-panel rounded-3xl p-8 shadow-[0_0_60px_rgba(139,92,246,0.1)] animate-slide-up" style="animation-delay: 0.4s;">
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-purple-100">Generated Lua Script</h2>
+      </div>
+      <pre id="output-code" class="w-full h-64 bg-[#0d0d1f] border border-purple-500/20 rounded-2xl p-6 text-purple-100 font-mono text-sm overflow-auto custom-scrollbar">-- Your converted Lua script will appear here...</pre>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center mt-16 pb-8 animate-slide-up" style="animation-delay: 0.5s;">
+      <p class="text-purple-400/40 text-sm">8N Piano Converter - Roblox Piano Auto-Player</p>
+    </footer>
+  </div>
+
+  <script>
+    // Star animation
+    const starsContainer = document.getElementById('stars-container');
+    for (let i = 0; i < 200; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2.5 + 0.5;
+      star.style.width = size + 'px';
+      star.style.height = size + 'px';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.opacity = Math.random() * 0.8 + 0.2;
+      star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+      star.style.animationDelay = Math.random() * 5 + 's';
+      starsContainer.appendChild(star);
+    }
+
+    // Note mapping for Roblox Piano
+    const noteMap = {
+      '1': 'C4', '!': 'C#4', '2': 'D4', '@': 'D#4', '3': 'E4', '4': 'F4', '$': 'F#4',
+      '5': 'G4', '%': 'G#4', '6': 'A4', '^': 'A#4', '7': 'B4', '8': 'C5', '*': 'C#5',
+      '9': 'D5', '(': 'D#5', '0': 'E5', 'q': 'F5', 'Q': 'F#5', 'w': 'G5', 'W': 'G#5',
+      'e': 'A5', 'E': 'A#5', 'r': 'B5', 't': 'C6', 'T': 'C#6', 'y': 'D6', 'Y': 'D#6',
+      'u': 'E6', 'i': 'F6', 'I': 'F#6', 'o': 'G6', 'O': 'G#6', 'p': 'A6', 'P': 'A#6',
+      'a': 'B6', 's': 'C7', 'S': 'C#7', 'd': 'D7', 'D': 'D#7', 'f': 'E7', 'g': 'F7',
+      'G': 'F#7', 'h': 'G7', 'H': 'G#7', 'j': 'A7', 'J': 'A#7', 'k': 'B7', 'l': 'C8',
+      'L': 'C#8', 'z': 'D8', 'Z': 'D#8', 'x': 'E8', 'c': 'F8', 'C': 'F#8', 'v': 'G8',
+      'V': 'G#8', 'b': 'A8', 'B': 'A#8', 'n': 'B8', 'm': 'C9'
+    };
+
+    // Generate piano keys
+    const pianoContainer = document.getElementById('piano-keys');
+    const whiteNotes = ['1','2','3','4','5','6','7','8','9','0','q','w','e','r','t','y','u','i','o','p','a','s','d','f','g','h','j','k','l','z','x','c','v','b','n','m'];
+    const blackNotes = ['!','@','$','%','^','*','(','Q','W','E','T','Y','I','O','P','S','D','G','H','J','L','Z','C','V','B'];
+
+    // Create white keys with proper spacing for black keys
+    const keyLayout = [
+      {w:'1', b:'!'}, {w:'2', b:'@'}, {w:'3'}, {w:'4', b:'$'}, {w:'5', b:'%'},
+      {w:'6', b:'^'}, {w:'7'}, {w:'8', b:'*'}, {w:'9', b:'('}, {w:'0'},
+      {w:'q', b:'Q'}, {w:'w', b:'W'}, {w:'e', b:'E'}, {w:'r'}, {w:'t', b:'T'},
+      {w:'y', b:'Y'}, {w:'u'}, {w:'i', b:'I'}, {w:'o', b:'O'}, {w:'p', b:'P'},
+      {w:'a'}, {w:'s', b:'S'}, {w:'d', b:'D'}, {w:'f'}, {w:'g', b:'G'},
+      {w:'h', b:'H'}, {w:'j', b:'J'}, {w:'k'}, {w:'l', b:'L'}, {w:'z', b:'Z'},
+      {w:'x'}, {w:'c', b:'C'}, {w:'v', b:'V'}, {w:'b', b:'B'}, {w:'n'}, {w:'m'}
+    ];
+
+    keyLayout.forEach((group, idx) => {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative flex flex-col items-center';
+      wrapper.style.width = '36px';
+
+      // White key
+      const whiteKey = document.createElement('div');
+      whiteKey.className = 'piano-white w-9 h-40 rounded-b-lg cursor-pointer flex items-end justify-center pb-2 text-xs text-gray-700 font-mono font-bold select-none';
+      whiteKey.dataset.note = group.w;
+      whiteKey.textContent = group.w;
+      whiteKey.id = `key-${group.w}`;
+      wrapper.appendChild(whiteKey);
+
+      // Black key (if exists)
+      if (group.b) {
+        const blackKey = document.createElement('div');
+        blackKey.className = 'piano-black absolute -top-0 w-6 h-24 rounded-b-md cursor-pointer flex items-end justify-center pb-1 text-[10px] text-gray-400 font-mono select-none';
+        blackKey.style.left = '28px';
+        blackKey.dataset.note = group.b;
+        blackKey.textContent = group.b;
+        blackKey.id = `key-${group.b}`;
+        wrapper.appendChild(blackKey);
+      }
+
+      pianoContainer.appendChild(wrapper);
+    });
+
+    // File upload
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+    const codeEditor = document.getElementById('code-editor');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.classList.add('border-purple-400', 'bg-purple-500/10');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropZone.addEventListener(eventName, () => {
+        dropZone.classList.remove('border-purple-400', 'bg-purple-500/10');
+      });
+    });
+
+    dropZone.addEventListener('drop', handleDrop);
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFiles);
+
+    function handleDrop(e) {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      handleFiles({ target: { files } });
+    }
+
+    function handleFiles(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        codeEditor.value = event.target.result;
+        convertToLua();
+      };
+      reader.readAsText(file);
+    }
+
+    // Convert MD to Lua
+    function convertToLua() {
+      const mdCode = codeEditor.value;
+      if (!mdCode.trim()) {
+        document.getElementById('output-code').textContent = '-- Your converted Lua script will appear here...';
+        return;
+      }
+
+      const lines = mdCode.split('\n');
+      let luaCode = `-- 8N Piano Auto-Player\n-- Generated from MD file\n\n`;
+      luaCode += `local bpm = ${document.getElementById('bpm-input').value}\n`;
+      luaCode += `local x = 0.1 -- key press duration\n\n`;
+      luaCode += `function keypress(key, duration, tempo)\n`;
+      luaCode += `    local waitTime = duration * (60 / tempo)\n`;
+      luaCode += `    -- VirtualInputManager:SendKeyEvent(true, Enum.KeyCode[key], false, game)\n`;
+      luaCode += `    -- task.wait(waitTime)\n`;
+      luaCode += `    -- VirtualInputManager:SendKeyEvent(false, Enum.KeyCode[key], false, game)\n`;
+      luaCode += `    print("Playing: " .. key)\n`;
+      luaCode += `end\n\n`;
+      luaCode += `function rest(duration, tempo)\n`;
+      luaCode += `    local waitTime = duration * (60 / tempo)\n`;
+      luaCode += `    -- task.wait(waitTime)\n`;
+      luaCode += `end\n\n`;
+      luaCode += `function finishedSong()\n`;
+      luaCode += `    print("Song finished!")\n`;
+      luaCode += `end\n\n`;
+      luaCode += `-- Song Sequence\n`;
+
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.startsWith('keypress(') || line.startsWith('rest(') || line === 'finishedSong()') {
+          luaCode += line + '\n';
+        }
+      });
+
+      document.getElementById('output-code').textContent = luaCode;
+    }
+
+    // Play animation
+    let isPlaying = false;
+    let playTimeouts = [];
+
+    function stopSong() {
+      isPlaying = false;
+      playTimeouts.forEach(t => clearTimeout(t));
+      playTimeouts = [];
+      document.getElementById('status-indicator').textContent = 'Ready';
+      document.getElementById('status-indicator').className = 'ml-auto px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-300 text-xs';
+      document.getElementById('btn-convert').classList.remove('hidden');
+      document.getElementById('btn-stop').classList.add('hidden');
+
+      // Clear all active keys
+      document.querySelectorAll('.piano-white, .piano-black').forEach(k => k.classList.remove('active'));
+    }
+
+    function playSong() {
+      if (isPlaying) {
+        stopSong();
+        return;
+      }
+
+      isPlaying = true;
+      document.getElementById('status-indicator').textContent = 'Playing...';
+      document.getElementById('status-indicator').className = 'ml-auto px-3 py-1 rounded-full bg-green-500/20 border border-green-500/40 text-green-300 text-xs animate-pulse';
+      document.getElementById('btn-convert').classList.add('hidden');
+      document.getElementById('btn-stop').classList.remove('hidden');
+
+      const bpm = parseInt(document.getElementById('bpm-input').value) || 120;
+      const speed = parseFloat(document.getElementById('speed-slider').value) || 1;
+      const lines = codeEditor.value.split('\n');
+      let accumulatedTime = 0;
+
+      lines.forEach((line, index) => {
+        line = line.trim();
+
+        if (line.startsWith('keypress(')) {
+          const match = line.match(/keypress\\("([^"]+)"\\s*,\\s*([^,]+)\\s*,\\s*bpm\\)/);
+          if (match) {
+            const note = match[1];
+            const duration = parseFloat(match[2]) || 0.5;
+            const delay = accumulatedTime;
+
+            const timeout = setTimeout(() => {
+              if (!isPlaying) return;
+              highlightKey(note);
+            }, delay);
+
+            playTimeouts.push(timeout);
+            accumulatedTime += (duration * (60000 / bpm) / speed);
+          }
+        } else if (line.startsWith('rest(')) {
+          const match = line.match(/rest\\(([^,]+),\\s*bpm\\)/);
+          const duration = match ? parseFloat(match[1]) : 0.5;
+          accumulatedTime += (duration * (60000 / bpm) / speed);
+        }
+      });
+
+      // Finished timeout
+      const finishTimeout = setTimeout(() => {
+        if (isPlaying) {
+          stopSong();
+          document.getElementById('status-indicator').textContent = 'Finished';
+        }
+      }, accumulatedTime + 500);
+      playTimeouts.push(finishTimeout);
+    }
+
+    function highlightKey(note) {
+      const key = document.getElementById(`key-${note}`);
+      if (key) {
+        key.classList.add('active');
+        setTimeout(() => {
+          key.classList.remove('active');
+        }, 200);
+      }
+    }
+
+    // Button events
+    document.getElementById('btn-convert').addEventListener('click', () => {
+      convertToLua();
+      playSong();
+    });
+
+    document.getElementById('btn-stop').addEventListener('click', stopSong);
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      const output = document.getElementById('output-code').textContent;
+      navigator.clipboard.writeText(output).then(() => {
+        const btn = document.getElementById('btn-copy');
+        const original = btn.innerHTML;
+        btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!';
+        setTimeout(() => btn.innerHTML = original, 2000);
+      });
+    });
+
+    document.getElementById('btn-download').addEventListener('click', () => {
+      const output = document.getElementById('output-code').textContent;
+      const blob = new Blob([output], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '8n_piano_script.lua';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Speed slider
+    document.getElementById('speed-slider').addEventListener('input', (e) => {
+      document.getElementById('speed-value').textContent = parseFloat(e.target.value).toFixed(1) + 'x';
+    });
+
+    // Auto-convert on input
+    codeEditor.addEventListener('input', convertToLua);
+    document.getElementById('bpm-input').addEventListener('input', convertToLua);
+
+    // Initial convert
+    convertToLua();
+  </script>
+</body>
+</html>
